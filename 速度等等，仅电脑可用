@@ -1,0 +1,497 @@
+-- 猫帝控制 - 速度跳跃重力设置脚本
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+-- 获取本地玩家
+local localPlayer = Players.LocalPlayer
+local playerGui = localPlayer:WaitForChild("PlayerGui")
+
+-- 创建主屏幕 GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "CatKingControlGUI"
+screenGui.Parent = playerGui
+screenGui.ResetOnSpawn = false
+
+-- 创建左上角标题
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Name = "CatKingTitle"
+titleLabel.Size = UDim2.new(0, 150, 0, 40)
+titleLabel.Position = UDim2.new(0, 10, 0, 10)
+titleLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+titleLabel.BackgroundTransparency = 0.3
+titleLabel.BorderSizePixel = 0
+titleLabel.Text = "猫帝控制"
+titleLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextSize = 18
+titleLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+titleLabel.TextStrokeTransparency = 0
+titleLabel.Parent = screenGui
+
+-- 添加圆角
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 6)
+titleCorner.Parent = titleLabel
+
+-- 创建主框架
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 320, 0, 350)
+mainFrame.Position = UDim2.new(0, 10, 0, 60)
+mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+mainFrame.BackgroundTransparency = 0.2
+mainFrame.BorderSizePixel = 0
+mainFrame.ClipsDescendants = true
+mainFrame.Parent = screenGui
+
+-- 添加圆角
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = mainFrame
+
+-- 创建标题栏
+local titleBar = Instance.new("Frame")
+titleBar.Name = "TitleBar"
+titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.Position = UDim2.new(0, 0, 0, 0)
+titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = mainFrame
+
+local titleBarCorner = Instance.new("UICorner")
+titleBarCorner.CornerRadius = UDim.new(0, 8)
+titleBarCorner.Parent = titleBar
+
+local title = Instance.new("TextLabel")
+title.Name = "Title"
+title.Size = UDim2.new(1, -40, 1, 0)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "角色控制设置"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+title.Parent = titleBar
+
+-- 关闭按钮
+local closeButton = Instance.new("TextButton")
+closeButton.Name = "CloseButton"
+closeButton.Size = UDim2.new(0, 30, 0, 30)
+closeButton.Position = UDim2.new(1, -30, 0, 0)
+closeButton.BackgroundTransparency = 1
+closeButton.Text = "X"
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextSize = 14
+closeButton.Parent = titleBar
+
+-- 创建内容区域
+local contentFrame = Instance.new("Frame")
+contentFrame.Name = "ContentFrame"
+contentFrame.Size = UDim2.new(1, -20, 1, -50)
+contentFrame.Position = UDim2.new(0, 10, 0, 40)
+contentFrame.BackgroundTransparency = 1
+contentFrame.Parent = mainFrame
+
+-- 速度设置
+local speedLabel = Instance.new("TextLabel")
+speedLabel.Name = "SpeedLabel"
+speedLabel.Size = UDim2.new(0.6, 0, 0, 20)
+speedLabel.Position = UDim2.new(0, 0, 0, 10)
+speedLabel.BackgroundTransparency = 1
+speedLabel.Text = "移动速度: 16"
+speedLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+speedLabel.Font = Enum.Font.Gotham
+speedLabel.TextSize = 12
+speedLabel.TextXAlignment = Enum.TextXAlignment.Left
+speedLabel.Parent = contentFrame
+
+local speedSlider = Instance.new("Frame")
+speedSlider.Name = "SpeedSlider"
+speedSlider.Size = UDim2.new(0.4, 0, 0, 10)
+speedSlider.Position = UDim2.new(0.6, 0, 0, 15)
+speedSlider.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+speedSlider.BorderSizePixel = 0
+speedSlider.Parent = contentFrame
+
+local speedSliderCorner = Instance.new("UICorner")
+speedSliderCorner.CornerRadius = UDim.new(0, 5)
+speedSliderCorner.Parent = speedSlider
+
+local speedSliderFill = Instance.new("Frame")
+speedSliderFill.Name = "SpeedSliderFill"
+speedSliderFill.Size = UDim2.new(0.5, 0, 1, 0)
+speedSliderFill.Position = UDim2.new(0, 0, 0, 0)
+speedSliderFill.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
+speedSliderFill.BorderSizePixel = 0
+speedSliderFill.Parent = speedSlider
+
+local speedFillCorner = Instance.new("UICorner")
+speedFillCorner.CornerRadius = UDim.new(0, 5)
+speedFillCorner.Parent = speedSliderFill
+
+-- 跳跃高度设置
+local jumpLabel = Instance.new("TextLabel")
+jumpLabel.Name = "JumpLabel"
+jumpLabel.Size = UDim2.new(0.6, 0, 0, 20)
+jumpLabel.Position = UDim2.new(0, 0, 0, 40)
+jumpLabel.BackgroundTransparency = 1
+jumpLabel.Text = "跳跃高度: 50"
+jumpLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+jumpLabel.Font = Enum.Font.Gotham
+jumpLabel.TextSize = 12
+jumpLabel.TextXAlignment = Enum.TextXAlignment.Left
+jumpLabel.Parent = contentFrame
+
+local jumpSlider = Instance.new("Frame")
+jumpSlider.Name = "JumpSlider"
+jumpSlider.Size = UDim2.new(0.4, 0, 0, 10)
+jumpSlider.Position = UDim2.new(0.6, 0, 0, 45)
+jumpSlider.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+jumpSlider.BorderSizePixel = 0
+jumpSlider.Parent = contentFrame
+
+local jumpSliderCorner = Instance.new("UICorner")
+jumpSliderCorner.CornerRadius = UDim.new(0, 5)
+jumpSliderCorner.Parent = jumpSlider
+
+local jumpSliderFill = Instance.new("Frame")
+jumpSliderFill.Name = "JumpSliderFill"
+jumpSliderFill.Size = UDim2.new(0.5, 0, 1, 0)
+jumpSliderFill.Position = UDim2.new(0, 0, 0, 0)
+jumpSliderFill.BackgroundColor3 = Color3.fromRGB(200, 100, 0)
+jumpSliderFill.BorderSizePixel = 0
+jumpSliderFill.Parent = jumpSlider
+
+local jumpFillCorner = Instance.new("UICorner")
+jumpFillCorner.CornerRadius = UDim.new(0, 5)
+jumpFillCorner.Parent = jumpSliderFill
+
+-- 重力设置
+local gravityLabel = Instance.new("TextLabel")
+gravityLabel.Name = "GravityLabel"
+gravityLabel.Size = UDim2.new(0.6, 0, 0, 20)
+gravityLabel.Position = UDim2.new(0, 0, 0, 70)
+gravityLabel.BackgroundTransparency = 1
+gravityLabel.Text = "重力强度: 196.2"
+gravityLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+gravityLabel.Font = Enum.Font.Gotham
+gravityLabel.TextSize = 12
+gravityLabel.TextXAlignment = Enum.TextXAlignment.Left
+gravityLabel.Parent = contentFrame
+
+local gravitySlider = Instance.new("Frame")
+gravitySlider.Name = "GravitySlider"
+gravitySlider.Size = UDim2.new(0.4, 0, 0, 10)
+gravitySlider.Position = UDim2.new(0.6, 0, 0, 75)
+gravitySlider.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+gravitySlider.BorderSizePixel = 0
+gravitySlider.Parent = contentFrame
+
+local gravitySliderCorner = Instance.new("UICorner")
+gravitySliderCorner.CornerRadius = UDim.new(0, 5)
+gravitySliderCorner.Parent = gravitySlider
+
+local gravitySliderFill = Instance.new("Frame")
+gravitySliderFill.Name = "GravitySliderFill"
+gravitySliderFill.Size = UDim2.new(0.5, 0, 1, 0)
+gravitySliderFill.Position = UDim2.new(0, 0, 0, 0)
+gravitySliderFill.BackgroundColor3 = Color3.fromRGB(150, 0, 150)
+gravitySliderFill.BorderSizePixel = 0
+gravitySliderFill.Parent = gravitySlider
+
+local gravityFillCorner = Instance.new("UICorner")
+gravityFillCorner.CornerRadius = UDim.new(0, 5)
+gravityFillCorner.Parent = gravitySliderFill
+
+-- 应用按钮
+local applyButton = Instance.new("TextButton")
+applyButton.Name = "ApplyButton"
+applyButton.Size = UDim2.new(1, 0, 0, 35)
+applyButton.Position = UDim2.new(0, 0, 0, 100)
+applyButton.BackgroundColor3 = Color3.fromRGB(60, 120, 60)
+applyButton.BorderSizePixel = 0
+applyButton.Text = "应用设置"
+applyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+applyButton.Font = Enum.Font.Gotham
+applyButton.TextSize = 14
+applyButton.Parent = contentFrame
+
+local applyCorner = Instance.new("UICorner")
+applyCorner.CornerRadius = UDim.new(0, 6)
+applyCorner.Parent = applyButton
+
+-- 重置按钮
+local resetButton = Instance.new("TextButton")
+resetButton.Name = "ResetButton"
+resetButton.Size = UDim2.new(1, 0, 0, 35)
+resetButton.Position = UDim2.new(0, 0, 0, 145)
+resetButton.BackgroundColor3 = Color3.fromRGB(120, 60, 60)
+resetButton.BorderSizePixel = 0
+resetButton.Text = "重置默认"
+applyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+resetButton.Font = Enum.Font.Gotham
+resetButton.TextSize = 14
+resetButton.Parent = contentFrame
+
+local resetCorner = Instance.new("UICorner")
+resetCorner.CornerRadius = UDim.new(0, 6)
+resetCorner.Parent = resetButton
+
+-- 状态显示
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Name = "StatusLabel"
+statusLabel.Size = UDim2.new(1, 0, 0, 40)
+statusLabel.Position = UDim2.new(0, 0, 0, 190)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "状态: 默认设置"
+statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextSize = 12
+statusLabel.TextWrapped = true
+statusLabel.Parent = contentFrame
+
+-- 提示文本
+local hintLabel = Instance.new("TextLabel")
+hintLabel.Name = "HintLabel"
+hintLabel.Size = UDim2.new(1, 0, 0, 60)
+hintLabel.Position = UDim2.new(0, 0, 0, 235)
+hintLabel.BackgroundTransparency = 1
+hintLabel.Text = "提示: 调整滑块后点击应用生效\nF - 隐藏/显示面板 | R - 重置设置"
+hintLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+hintLabel.Font = Enum.Font.Gotham
+hintLabel.TextSize = 11
+hintLabel.TextWrapped = true
+hintLabel.Parent = contentFrame
+
+-- 拖拽功能
+local dragging = false
+local dragInput, dragStart, startPos
+
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+titleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- 关闭按钮功能
+closeButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+-- 按钮悬停效果
+local function buttonHoverEffect(button, normalColor, hoverColor)
+    button.MouseEnter:Connect(function()
+        TweenService:Create(
+            button,
+            TweenInfo.new(0.2),
+            {BackgroundColor3 = hoverColor}
+        ):Play()
+    end)
+    
+    button.MouseLeave:Connect(function()
+        TweenService:Create(
+            button,
+            TweenInfo.new(0.2),
+            {BackgroundColor3 = normalColor}
+        ):Play()
+    end)
+end
+
+buttonHoverEffect(applyButton, Color3.fromRGB(60, 120, 60), Color3.fromRGB(80, 160, 80))
+buttonHoverEffect(resetButton, Color3.fromRGB(120, 60, 60), Color3.fromRGB(160, 80, 80))
+
+-- 控制变量
+local walkSpeed = 16
+local jumpPower = 50
+local gravity = 196.2
+local character
+local humanoid
+
+-- 初始化人物
+local function initializeCharacter()
+    character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+    humanoid = character:WaitForChild("Humanoid")
+    
+    -- 应用当前设置
+    humanoid.WalkSpeed = walkSpeed
+    humanoid.JumpPower = jumpPower
+    workspace.Gravity = gravity
+    
+    -- 监听人物死亡
+    humanoid.Died:Connect(function()
+        -- 角色死亡时不改变设置
+    end)
+end
+
+-- 初始化
+if localPlayer.Character then
+    initializeCharacter()
+end
+localPlayer.CharacterAdded:Connect(initializeCharacter)
+
+-- 滑块功能
+local function setupSlider(slider, fill, label, minValue, maxValue, currentValue, formatFunc, callback)
+    local dragging = false
+    
+    slider.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+        end
+    end)
+    
+    slider.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local xPos = math.clamp(input.Position.X - slider.AbsolutePosition.X, 0, slider.AbsoluteSize.X)
+            local percent = xPos / slider.AbsoluteSize.X
+            
+            fill.Size = UDim2.new(percent, 0, 1, 0)
+            local value = minValue + percent * (maxValue - minValue)
+            
+            if formatFunc then
+                value = formatFunc(value)
+            else
+                value = math.floor(value)
+            end
+            
+            if callback then
+                callback(value)
+            else
+                label.Text = label.Name:split(":")[1] .. ": " .. value
+            end
+        end
+    end)
+end
+
+-- 速度滑块 (1-100)
+setupSlider(speedSlider, speedSliderFill, speedLabel, 1, 100, walkSpeed, nil, function(value)
+    walkSpeed = math.floor(value)
+    speedLabel.Text = "移动速度: " .. walkSpeed
+end)
+
+-- 跳跃高度滑块 (0-200)
+setupSlider(jumpSlider, jumpSliderFill, jumpLabel, 0, 200, jumpPower, nil, function(value)
+    jumpPower = math.floor(value)
+    jumpLabel.Text = "跳跃高度: " .. jumpPower
+end)
+
+-- 重力滑块 (0-500)
+setupSlider(gravitySlider, gravitySliderFill, gravityLabel, 0, 500, gravity, function(value)
+    return math.floor(value * 10) / 10 -- 保留一位小数
+end, function(value)
+    gravity = math.floor(value * 10) / 10
+    gravityLabel.Text = "重力强度: " .. gravity
+end)
+
+-- 初始化滑块位置
+speedSliderFill.Size = UDim2.new((walkSpeed - 1) / 99, 0, 1, 0)
+jumpSliderFill.Size = UDim2.new(jumpPower / 200, 0, 1, 0)
+gravitySliderFill.Size = UDim2.new(gravity / 500, 0, 1, 0)
+
+-- 应用设置
+applyButton.MouseButton1Click:Connect(function()
+    if humanoid and humanoid.Health > 0 then
+        humanoid.WalkSpeed = walkSpeed
+        humanoid.JumpPower = jumpPower
+        workspace.Gravity = gravity
+        
+        statusLabel.Text = "状态: 设置已应用\n速度: " .. walkSpeed .. " | 跳跃: " .. jumpPower .. " | 重力: " .. gravity
+        titleLabel.Text = "猫帝控制 [" .. walkSpeed .. "/" .. jumpPower .. "/" .. gravity .. "]"
+    else
+        statusLabel.Text = "状态: 角色不可用，等待重生后自动应用"
+    end
+end)
+
+-- 重置默认设置
+resetButton.MouseButton1Click:Connect(function()
+    walkSpeed = 16
+    jumpPower = 50
+    gravity = 196.2
+    
+    -- 更新滑块
+    speedSliderFill.Size = UDim2.new((walkSpeed - 1) / 99, 0, 1, 0)
+    jumpSliderFill.Size = UDim2.new(jumpPower / 200, 0, 1, 0)
+    gravitySliderFill.Size = UDim2.new(gravity / 500, 0, 1, 0)
+    
+    -- 更新标签
+    speedLabel.Text = "移动速度: " .. walkSpeed
+    jumpLabel.Text = "跳跃高度: " .. jumpPower
+    gravityLabel.Text = "重力强度: " .. gravity
+    
+    -- 应用设置
+    if humanoid and humanoid.Health > 0 then
+        humanoid.WalkSpeed = walkSpeed
+        humanoid.JumpPower = jumpPower
+        workspace.Gravity = gravity
+    end
+    
+    statusLabel.Text = "状态: 已重置为默认设置"
+    titleLabel.Text = "猫帝控制 [默认]"
+end)
+
+-- R键重置设置
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    
+    if input.KeyCode == Enum.KeyCode.R then
+        resetButton.MouseButton1Click:Connect()
+    end
+end)
+
+-- F键显示/隐藏控制面板
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    
+    if input.KeyCode == Enum.KeyCode.F then
+        mainFrame.Visible = not mainFrame.Visible
+    end
+end)
+
+-- 自动重新应用设置当角色重新生成时
+localPlayer.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+    humanoid = newCharacter:WaitForChild("Humanoid")
+    
+    -- 等待角色完全加载
+    wait(1)
+    
+    -- 应用当前设置
+    humanoid.WalkSpeed = walkSpeed
+    humanoid.JumpPower = jumpPower
+    workspace.Gravity = gravity
+    
+    statusLabel.Text = "状态: 设置已自动应用到新角色"
+end)
+
+-- 初始状态
+statusLabel.Text = "状态: 默认设置\n速度: " .. walkSpeed .. " | 跳跃: " .. jumpPower .. " | 重力: " .. gravity
